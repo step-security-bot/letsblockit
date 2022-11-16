@@ -4,22 +4,35 @@ on:
   push:
     branches:
       - main
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   run-tests:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
       - name: Start PostgreSQL
         run: sudo service postgresql start
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Create PostgreSQL user and tables
         run: |
           sudo -u postgres psql -c "CREATE USER ${USER}"
           sudo -u postgres psql -c "CREATE DATABASE lbitests OWNER ${USER}"
-      - uses: cachix/install-nix-action@v18
+      - uses: cachix/install-nix-action@daddc62a2e67d1decb56e028c9fa68344b9b7c2a
       - run: nix run .#run-tests
   check-vendorsha:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v18
+      - name: Harden Runner
+        uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - uses: cachix/install-nix-action@daddc62a2e67d1decb56e028c9fa68344b9b7c2a
       - run: nix run .#update-vendorsha -- ./nix/letsblockit.nix --check

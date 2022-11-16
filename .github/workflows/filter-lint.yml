@@ -11,15 +11,20 @@ jobs:
   filter-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Harden Runner
+        uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@c4a742cab115ed795e34d4513e2cf7d472deb55f
       - name: Run linting and save output
         run: go test ./src/filters/ > output.txt
       - name: Comment on success
         if: ${{ success() }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@adca94abcaf73c10466a71cc83ae561fd66d1a56
         with:
           header: filter-lint
           path: .github/filter-lint-ok.md
@@ -30,7 +35,7 @@ jobs:
           cat .github/filter-lint-failed.md | envsubst > report.md
       - name: Comment on failure
         if: ${{ failure() }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@adca94abcaf73c10466a71cc83ae561fd66d1a56
         with:
           header: filter-lint
           path: report.md
