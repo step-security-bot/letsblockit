@@ -4,10 +4,20 @@ on:
     branches:
       - main
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   reset:
+    permissions:
+      contents: write  # for Git to git push
     runs-on: ubuntu-latest
     if: github.repository == 'letsblockit/letsblockit'
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
       - uses: actions/checkout@v3
       - run: git push origin main:staging --force

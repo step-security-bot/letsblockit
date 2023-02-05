@@ -9,3 +9,14 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/assets
+    schedule:
+      interval: daily
